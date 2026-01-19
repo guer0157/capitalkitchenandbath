@@ -1,5 +1,40 @@
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const disableSubmitButton = (button, elements) => {
+  const errors = [];
+  elements.forEach((element) => {
+    errors.push(element[0].id);
+    element[0].addEventListener("change", (event) => {
+      if (event.target.value.length > 0) {
+        const idToRemoveFromError = errors.indexOf(element[0].id);
+        errors.splice(idToRemoveFromError, 1);
+      }
+      if (
+        event.target.id === "property-type" &&
+        event.target.value !== "condo-apartment"
+      ) {
+        const condoRulesIndex = errors.indexOf("condo-rules");
+        if (condoRulesIndex > -1) {
+          errors.splice(condoRulesIndex, 1);
+        }
+      } else if (event.target.id === "property-type") {
+        const condoRulesIndex = errors.indexOf("condo-rules");
+        console.log("condoRulesIndex:", condoRulesIndex);
+        if (condoRulesIndex === -1) {
+          errors.push("condo-rules");
+        }
+      }
+
+      if (errors.length === 0) {
+        button.classList.remove("disabled");
+      } else {
+        button.classList.add("disabled");
+      }
+      console.log("errors:", errors);
+    });
+  });
+};
+
 const setUpContactUsForm = () => {
   const nameContactUs = document.getElementById("name");
   const emailContactUs = document.getElementById("email");
@@ -42,9 +77,6 @@ const setUpContactUsForm = () => {
   const decisionMakerErrorContactUs = document.getElementById(
     "decisionMakerErrorContactUs",
   );
-  const condoRulesErrorContactUs = document.getElementById(
-    "condoRulesErrorContactUs",
-  );
   const priorityErrorContactUs = document.getElementById(
     "priorityErrorContactUs",
   );
@@ -58,6 +90,20 @@ const setUpContactUsForm = () => {
   const submitButtonContactUs = document.getElementById(
     "submitButtonContactUs",
   );
+  const elements = [
+    [nameContactUs, nameErrorContactUs],
+    [emailContactUs, missingEmailErrorContactUs, invalidEmailErrorContactUs],
+    [phoneContactUs, phoneErrorContactUs],
+    [projectType, projectTypeErrorContactUs],
+    [propertyType, propertyTypeErrorContactUs],
+    [startTimeframe, startTimeframeErrorContactUs],
+    [budgetRange, budgetRangeErrorContactUs],
+    [projectScope, projectScopeErrorContactUs],
+    [decisionMaker, decisionMakerErrorContactUs],
+    [condoRules, decisionMakerErrorContactUs],
+    [priority, priorityErrorContactUs],
+    [message, messageErrorContactUs],
+  ];
 
   propertyType.addEventListener("change", (e) => {
     if (e.target.value !== "condo-apartment") {
@@ -66,89 +112,27 @@ const setUpContactUsForm = () => {
       condoRules.parentElement.classList.remove("d-none");
     }
   });
+  disableSubmitButton(submitButtonContactUs, elements);
 
   submitButtonContactUs.addEventListener("click", async (e) => {
     e.preventDefault();
     submitButtonContactUs.classList.add("disabled");
     let hasErrors = false;
-    if (nameContactUs.value.length === 0) {
-      nameErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      nameErrorContactUs.classList.remove("d-block");
-    }
-    if (emailContactUs.value.length === 0) {
-      missingEmailErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      missingEmailErrorContactUs.classList.remove("d-block");
-    }
     if (!emailRegex.test(emailContactUs.value)) {
       invalidEmailErrorContactUs.classList.add("d-block");
       hasErrors = true;
     } else {
       invalidEmailErrorContactUs.classList.remove("d-block");
     }
-    if (phoneContactUs.value.length === 0) {
-      phoneErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      phoneErrorContactUs.classList.remove("d-block");
-    }
-    if (projectType.value.length === 0) {
-      projectTypeErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      projectTypeErrorContactUs.classList.remove("d-block");
-    }
-    if (propertyType.value.length === 0) {
-      propertyTypeErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      propertyTypeErrorContactUs.classList.remove("d-block");
-    }
-    if (startTimeframe.value.length === 0) {
-      startTimeframeErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      startTimeframeErrorContactUs.classList.remove("d-block");
-    }
-    if (budgetRange.value.length === 0) {
-      budgetRangeErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      budgetRangeErrorContactUs.classList.remove("d-block");
-    }
-    if (projectScope.value.length === 0) {
-      projectScopeErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      projectScopeErrorContactUs.classList.remove("d-block");
-    }
-    if (decisionMaker.value.length === 0) {
-      decisionMakerErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      decisionMakerErrorContactUs.classList.remove("d-block");
-    }
-    if (condoRules.value.length === 0) {
-      condoRulesErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      condoRulesErrorContactUs.classList.remove("d-block");
-    }
-    if (priority.value.length === 0) {
-      priorityErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      priorityErrorContactUs.classList.remove("d-block");
-    }
-    if (message.value.length === 0) {
-      messageErrorContactUs.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      messageErrorContactUs.classList.remove("d-block");
-    }
+    elements.forEach((element) => {
+      if (element[0].value.length === 0) {
+        element[1].classList.add("d-block");
+        hasErrors = true;
+      } else {
+        element[1].classList.remove("d-block");
+      }
+    });
+
     if (hasErrors) {
       submitErrorMessage.classList.add("d-none");
       submitErrorMessage.classList.add("d-block");
@@ -181,18 +165,21 @@ const setUpContactUsForm = () => {
         },
       );
       // clear form
-      nameContactUs.value = "";
-      emailContactUs.value = "";
-      phoneContactUs.value = "";
-      projectType.value = "";
-      propertyType.value = "";
-      startTimeframe.value = "";
-      budgetRange.value = "";
-      projectScope.value = "";
-      decisionMaker.value = "";
-      condoRules.value = "";
-      priority.value = "";
-      message.value = "";
+      // nameContactUs.value = "";
+      // emailContactUs.value = "";
+      // phoneContactUs.value = "";
+      // projectType.value = "";
+      // propertyType.value = "";
+      // startTimeframe.value = "";
+      // budgetRange.value = "";
+      // projectScope.value = "";
+      // decisionMaker.value = "";
+      // condoRules.value = "";
+      // priority.value = "";
+      // message.value = "";
+      elements.forEach((element) => {
+        element[0].value = "";
+      });
       submitButtonContactUs.classList.remove("disabled");
     }
   });
