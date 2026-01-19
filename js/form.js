@@ -129,7 +129,13 @@ const setUpContactUsForm = () => {
     }
     elements.forEach((element) => {
       if (element[0].value.length === 0) {
-        console.log("Showing error for:", element[0].id);
+        if (
+          element[0].id === "condo-rules" &&
+          propertyType.value !== "condo-apartment"
+        ) {
+          // skip showing error
+          return;
+        }
         element[1].classList.add("d-block");
         hasErrors = true;
       } else {
