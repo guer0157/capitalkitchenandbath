@@ -29,3 +29,22 @@
   position: relative;
   z-index: 2;
 }
+
+.down-arrow-animation {
+  display: inline-block;
+  animation: arrowFloat 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  font-size: 3rem;
+  color: var(--bs-primary);
+}
+
+@keyframes arrowFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
