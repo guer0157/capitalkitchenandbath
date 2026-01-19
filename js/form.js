@@ -74,6 +74,9 @@ const setUpContactUsForm = () => {
   const projectScopeErrorContactUs = document.getElementById(
     "projectScopeErrorContactUs",
   );
+  const condoRulesErrorContactUs = document.getElementById(
+    "condoRulesErrorContactUs",
+  );
   const decisionMakerErrorContactUs = document.getElementById(
     "decisionMakerErrorContactUs",
   );
@@ -100,7 +103,7 @@ const setUpContactUsForm = () => {
     [budgetRange, budgetRangeErrorContactUs],
     [projectScope, projectScopeErrorContactUs],
     [decisionMaker, decisionMakerErrorContactUs],
-    [condoRules, decisionMakerErrorContactUs],
+    [condoRules, condoRulesErrorContactUs],
     [priority, priorityErrorContactUs],
     [message, messageErrorContactUs],
   ];
