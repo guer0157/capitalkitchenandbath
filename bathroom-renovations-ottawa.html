@@ -50,14 +50,26 @@
       name="twitter:image"
       content="https://www.capitalkitchenandbath.ca/assets/capital-kitchen-and-bath-horizontal-w-name-black.png"
     />
+    <!-- Local SEO -->
+    <meta name="geo.region" content="CA-ON" />
+    <meta name="geo.placename" content="Ottawa" />
+    <meta name="geo.position" content="45.4215;-75.6972" />
+    <meta name="ICBM" content="45.4215, -75.6972" />
 
+    <!-- Language -->
+    <meta http-equiv="content-language" content="en-CA" />
     <!-- Optional: Meta Keywords (low impact, safe) -->
     <meta
       name="keywords"
       content="bathroom renovations Ottawa, bathroom remodel Ottawa, Ottawa bathroom contractor, condo bathroom renovation Ottawa"
     />
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-
+    <!-- Favicon-->
+    <link
+      rel="icon"
+      type="image/png"
+      href="/assets/favicon-96x96.png"
+      sizes="96x96"
+    />
     <script
       src="https://use.fontawesome.com/releases/v6.3.0/js/all.js"
       crossorigin="anonymous"
@@ -76,6 +88,62 @@
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
     <link href="css/bathroom.css" rel="stylesheet" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How much does a bathroom renovation cost in Ottawa?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Bathroom renovation costs in Ottawa typically range from $30,000 to $70,000+, depending on size, layout changes, waterproofing requirements, and the condition of existing plumbing and electrical."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do bathroom renovations require permits in Ottawa?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Bathroom renovations often require permits when plumbing, electrical, or ventilation changes are involved. We handle permit requirements and inspections as part of a properly planned renovation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How long does a bathroom renovation take?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Most bathroom renovations take between 3 to 6 weeks once construction begins, depending on scope, inspections, and material availability."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do you renovate condo bathrooms in Ottawa?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. We renovate bathrooms in both houses and condos across Ottawa, including coordinating with condo management and complying with building rules."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can changes be made during a bathroom renovation?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Changes are handled through a formal change order process, with clear documentation of pricing and schedule impacts before work proceeds."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Who is a good fit for Capital Kitchen and Bath?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We are a good fit for homeowners who value quality workmanship, clear communication, and proper planning. We may not be the right fit for those focused primarily on lowest price."
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body id="page-top">
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
@@ -126,6 +194,11 @@
         <h2 class="masthead-heading text-uppercase">
           Professionally Planned. Properly Built. No Surprises.
         </h2>
+        <a
+          class="btn btn-primary btn-xl text-uppercase"
+          href="/index.html#contact"
+          >Get in touch now!</a
+        >
       </div>
     </header>
     <!-- Bathroom Renovations Section -->
@@ -213,7 +286,6 @@
           <i class="fa-solid fa-down-long"></i>
         </span>
       </div>
-      `
     </section>
     <!-- Our process   -->
     <section>
@@ -458,6 +530,11 @@
               Our goal is to deliver bathrooms that are functional, durable, and
               built with care — not rushed for volume.
             </p>
+            <a
+              class="btn btn-primary btn-xl text-uppercase"
+              href="/index.html#contact"
+              >Get in touch now!</a
+            >
           </div>
           <!-- Image column -->
           <div class="col-12 col-md-6 mb-4 mb-md-0">
@@ -470,6 +547,182 @@
         </div>
       </div>
     </section>
+    <section class="container my-5">
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <h2 class="mb-4">Frequently Asked Questions</h2>
+
+          <div class="accordion" id="bathroomFaqAccordion">
+            <!-- FAQ 1 -->
+            <div class="accordion-item">
+              <h3 class="accordion-header" id="bathFaqOne">
+                <button
+                  class="accordion-button"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#bathFaqOneContent"
+                  aria-expanded="true"
+                  aria-controls="bathFaqOneContent"
+                >
+                  How much does a bathroom renovation cost in Ottawa?
+                </button>
+              </h3>
+              <div
+                id="bathFaqOneContent"
+                class="accordion-collapse collapse show"
+                data-bs-parent="#bathroomFaqAccordion"
+              >
+                <div class="accordion-body">
+                  Bathroom renovation costs in Ottawa typically range from
+                  <strong>$30,000 to $70,000+</strong>, depending on size,
+                  layout changes, waterproofing requirements, and the condition
+                  of existing plumbing and electrical.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 2 -->
+            <div class="accordion-item">
+              <h3 class="accordion-header" id="bathFaqTwo">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#bathFaqTwoContent"
+                  aria-expanded="false"
+                  aria-controls="bathFaqTwoContent"
+                >
+                  Do bathroom renovations require permits in Ottawa?
+                </button>
+              </h3>
+              <div
+                id="bathFaqTwoContent"
+                class="accordion-collapse collapse"
+                data-bs-parent="#bathroomFaqAccordion"
+              >
+                <div class="accordion-body">
+                  Yes. Bathroom renovations often require permits when plumbing,
+                  electrical, or ventilation changes are involved. We handle
+                  permit requirements and inspections as part of a properly
+                  planned renovation.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 3 -->
+            <div class="accordion-item">
+              <h3 class="accordion-header" id="bathFaqThree">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#bathFaqThreeContent"
+                  aria-expanded="false"
+                  aria-controls="bathFaqThreeContent"
+                >
+                  How long does a bathroom renovation take?
+                </button>
+              </h3>
+              <div
+                id="bathFaqThreeContent"
+                class="accordion-collapse collapse"
+                data-bs-parent="#bathroomFaqAccordion"
+              >
+                <div class="accordion-body">
+                  Most bathroom renovations take between
+                  <strong>3 to 6 weeks</strong> once construction begins.
+                  Timelines depend on scope, inspections, and material
+                  availability.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 4 -->
+            <div class="accordion-item">
+              <h3 class="accordion-header" id="bathFaqFour">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#bathFaqFourContent"
+                  aria-expanded="false"
+                  aria-controls="bathFaqFourContent"
+                >
+                  Do you renovate condo bathrooms in Ottawa?
+                </button>
+              </h3>
+              <div
+                id="bathFaqFourContent"
+                class="accordion-collapse collapse"
+                data-bs-parent="#bathroomFaqAccordion"
+              >
+                <div class="accordion-body">
+                  Yes. We renovate bathrooms in both houses and condos across
+                  Ottawa. Condo renovations require coordination with building
+                  management, compliance with condo rules, and scheduling
+                  considerations.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 5 -->
+            <div class="accordion-item">
+              <h3 class="accordion-header" id="bathFaqFive">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#bathFaqFiveContent"
+                  aria-expanded="false"
+                  aria-controls="bathFaqFiveContent"
+                >
+                  Can changes be made during a bathroom renovation?
+                </button>
+              </h3>
+              <div
+                id="bathFaqFiveContent"
+                class="accordion-collapse collapse"
+                data-bs-parent="#bathroomFaqAccordion"
+              >
+                <div class="accordion-body">
+                  Changes can be made through a formal change order process. All
+                  changes are reviewed for cost and schedule impact and approved
+                  before work continues.
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ 6 -->
+            <div class="accordion-item">
+              <h3 class="accordion-header" id="bathFaqSix">
+                <button
+                  class="accordion-button collapsed"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target="#bathFaqSixContent"
+                  aria-expanded="false"
+                  aria-controls="bathFaqSixContent"
+                >
+                  Who is a good fit for Capital Kitchen and Bath?
+                </button>
+              </h3>
+              <div
+                id="bathFaqSixContent"
+                class="accordion-collapse collapse"
+                data-bs-parent="#bathroomFaqAccordion"
+              >
+                <div class="accordion-body">
+                  We work best with homeowners who value quality workmanship,
+                  clear communication, and proper planning. If lowest price is
+                  the main priority, we may not be the right fit.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Footer-->
     <footer class="footer py-4">
       <div class="container">
