@@ -1,72 +1,5 @@
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const setUpMailingListForm = () => {
-  const nameMailingList = document.getElementById("nameMailingList");
-  const emailMailingList = document.getElementById("emailMailingList");
-  const submitButtonMailingList = document.getElementById(
-    "submitButtonMailingList"
-  );
-  // errors
-  const nameErrorMailingList = document.getElementById("nameErrorMailingList");
-  const emailErrorMailingList = document.getElementById(
-    "emailErrorMailingList"
-  );
-  const invalidEmailErrorMailingList = document.getElementById(
-    "invalidEmailErrorMailingList"
-  );
-  const submitErrorMessageMailingList = document.getElementById(
-    "submitErrorMessageMailingList"
-  );
-  const submitSuccessMessageMailingList = document.getElementById(
-    "submitSuccessMessageMailingList"
-  );
-  submitButtonMailingList.addEventListener("click", async (e) => {
-    let hasErrors = false;
-    e.preventDefault();
-    submitButtonMailingList.classList.add("disabled");
-    if (nameMailingList.value.length === 0) {
-      nameErrorMailingList.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      nameErrorMailingList.classList.remove("d-block");
-    }
-    if (emailMailingList.value.length === 0) {
-      emailErrorMailingList.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      emailErrorMailingList.classList.remove("d-block");
-    }
-    if (!emailRegex.test(emailMailingList.value)) {
-      invalidEmailErrorMailingList.classList.add("d-block");
-      hasErrors = true;
-    } else {
-      invalidEmailErrorMailingList.classList.remove("d-block");
-    }
-
-    if (hasErrors) {
-      submitErrorMessageMailingList.classList.remove("d-none");
-      submitErrorMessageMailingList.classList.add("d-block");
-      return;
-    } else {
-      submitErrorMessageMailingList.classList.remove("d-block");
-      submitErrorMessageMailingList.classList.add("d-none");
-      submitSuccessMessageMailingList.classList.remove("d-none");
-      submitSuccessMessageMailingList.classList.add("d-block");
-      await fetch("https://askcharly.ca/api/email/geckodes/mailing-list", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: nameMailingList.value,
-          email: emailMailingList.value,
-        }),
-      });
-      // clear form
-      nameMailingList.value = "";
-      emailMailingList.value = "";
-      submitButtonMailingList.classList.remove("disabled");
-    }
-  });
-};
 const setUpContactUsForm = () => {
   const nameContactUs = document.getElementById("nameContactUs");
   const emailContactUs = document.getElementById("emailContactUs");
@@ -75,23 +8,23 @@ const setUpContactUsForm = () => {
   // Errors
   const nameErrorContactUs = document.getElementById("nameErrorContactUs");
   const missingEmailErrorContactUs = document.getElementById(
-    "missingEmailErrorContactUs"
+    "missingEmailErrorContactUs",
   );
   const invalidEmailErrorContactUs = document.getElementById(
-    "invalidEmailErrorContactUs"
+    "invalidEmailErrorContactUs",
   );
   const phoneErrorContactUs = document.getElementById("phoneErrorContactUs");
   const messageErrorContactUs = document.getElementById(
-    "messageErrorContactUs"
+    "messageErrorContactUs",
   );
   const submitErrorMessageContactUs = document.getElementById(
-    "submitErrorMessageContactUs"
+    "submitErrorMessageContactUs",
   );
   const submitSuccessMessageContactUs = document.getElementById(
-    "submitSuccessMessageContactUs"
+    "submitSuccessMessageContactUs",
   );
   const submitButtonContactUs = document.getElementById(
-    "submitButtonContactUs"
+    "submitButtonContactUs",
   );
 
   submitButtonContactUs.addEventListener("click", async (e) => {
@@ -138,16 +71,25 @@ const setUpContactUsForm = () => {
       submitErrorMessageContactUs.classList.remove("d-block");
       submitSuccessMessageContactUs.classList.remove("d-none");
       submitSuccessMessageContactUs.classList.add("d-block");
-      await fetch("https://askcharly.ca/api/email/geckodes/contact-us", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: nameContactUs.value,
-          email: emailContactUs.value,
-          phone: phoneContactUs.value,
-          message: messageContactUs.value,
-        }),
-      });
+      await fetch(
+        "https://askcharly.ca/api/email/capitalkitchenandbath/contact-us",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          // body: JSON.stringify({
+          //   name: nameContactUs.value,
+          //   email: emailContactUs.value,
+          //   phone: phoneContactUs.value,
+          //   message: messageContactUs.value,
+          // }),
+          body: JSON.stringify({
+            name: "The name is here",
+            email: "The email too is here",
+            phone: "1111111111",
+            message: "My message is here",
+          }),
+        },
+      );
       // clear form
       nameContactUs.value = "";
       emailContactUs.value = "";
