@@ -85,7 +85,7 @@ const setUpContactUsForm = () => {
   );
   const submitErrorMessage = document.getElementById("submitErrorMessage");
   const submitSuccessMessageContactUs = document.getElementById(
-    "submitSuccessMessageContactUs",
+    "submitSuccessMessage",
   );
   const submitButtonContactUs = document.getElementById(
     "submitButtonContactUs",
