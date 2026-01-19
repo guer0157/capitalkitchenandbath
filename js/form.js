@@ -5,9 +5,12 @@ const disableSubmitButton = (button, elements) => {
   elements.forEach((element) => {
     errors.push(element[0].id);
     element[0].addEventListener("change", (event) => {
+      console.log("Changed:", event.target.id, event.target.value);
       if (event.target.value.length > 0) {
         const idToRemoveFromError = errors.indexOf(element[0].id);
         errors.splice(idToRemoveFromError, 1);
+      } else {
+        errors.push(element[0].id);
       }
       if (
         event.target.id === "property-type" &&
