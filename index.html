@@ -561,7 +561,9 @@
                   type="text"
                   placeholder="Your Name *"
                 />
-                <div class="invalid-feedback">A name is required.</div>
+                <div class="invalid-feedback" id="nameErrorContactUs">
+                  A name is required.
+                </div>
               </div>
               <div class="form-group">
                 <!-- Email address input-->
@@ -571,8 +573,12 @@
                   type="email"
                   placeholder="Your Email *"
                 />
-                <div class="invalid-feedback">An email is required.</div>
-                <div class="invalid-feedback">Email is not valid.</div>
+                <div class="invalid-feedback" id="missingEmailErrorContactUs">
+                  An email is required.
+                </div>
+                <div class="invalid-feedback" id="invalidEmailErrorContactUs">
+                  Email is not valid.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <!-- Phone number input-->
@@ -582,7 +588,9 @@
                   type="tel"
                   placeholder="Your Phone *"
                 />
-                <div class="invalid-feedback">A phone number is required.</div>
+                <div class="invalid-feedback" id="phoneErrorContactUs">
+                  A phone number is required.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <!-- Project Type-->
@@ -603,7 +611,9 @@
                   <option value="kitchen">Kitchen Renovation</option>
                   <option value="not-sure">Not sure yet</option>
                 </select>
-                <div class="invalid-feedback">Project type is required.</div>
+                <div class="invalid-feedback" id="projectTypeErrorContactUs">
+                  Project type is required.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <!-- Project Type-->
@@ -622,7 +632,9 @@
                   <option value="condo-apartment">Condo/Apartment</option>
                   <option value="townhouse">Townhouse</option>
                 </select>
-                <div class="invalid-feedback">Property type is required.</div>
+                <div class="invalid-feedback" id="propertyTypeErrorContactUs">
+                  Property type is required.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <!-- Project Type-->
@@ -634,7 +646,7 @@
                 </label>
                 <select
                   name="start-time"
-                  id="start-time"
+                  id="start-timeframe"
                   aria-placeholder="When are you hoping to start the renovation?"
                   class="form-select"
                 >
@@ -647,11 +659,13 @@
                   <option value="3-6months">3–6 months</option>
                   <option value="6+months">6+ months / planning stage</option>
                 </select>
-                <div class="invalid-feedback">Start time is required.</div>
+                <div class="invalid-feedback" id="startTimeframeErrorContactUs">
+                  Start time is required.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <!-- Project Type-->
-                <label for="project-type" class="col-form-label"
+                <label for="budget-range" class="col-form-label"
                   >What budget range have you allocated for this project?<span
                     class="required-star"
                     >*</span
@@ -671,7 +685,9 @@
                   <option value="70000+">$70,000+</option>
                   <option value="not-sure">Not sure yet</option>
                 </select>
-                <div class="invalid-feedback">Budget is required.</div>
+                <div class="invalid-feedback" id="budgetRangeErrorContactUs">
+                  Budget is required.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <label for="project-scope" class="col-form-label"
@@ -699,7 +715,7 @@
                   </option>
                   <option value="not-sure">Not sure / need guidance</option>
                 </select>
-                <div class="invalid-feedback">
+                <div class="invalid-feedback" id="projectScopeErrorContactUs">
                   Please select the project scope.
                 </div>
               </div>
@@ -725,11 +741,11 @@
                   <option value="shared">Decision shared with partner</option>
                   <option value="no">No (another party must approve)</option>
                 </select>
-                <div class="invalid-feedback">
+                <div class="invalid-feedback" id="decisionMakerErrorContactUs">
                   Please tell us who the decision-maker is.
                 </div>
               </div>
-              <div class="form-group mb-md-0">
+              <div class="form-group mb-md-0 d-none">
                 <label for="condo-rules" class="col-form-label"
                   >Have you confirmed renovation rules with your condo
                   board?<span class="required-star">*</span>
@@ -746,7 +762,9 @@
                   <option value="not-yet">Not yet</option>
                   <option value="not-sure">Not sure who to contact</option>
                 </select>
-                <div class="invalid-feedback">Please select an option.</div>
+                <div class="invalid-feedback" id="condoRulesErrorContactUs">
+                  Please select an option.
+                </div>
               </div>
               <div class="form-group mb-md-0">
                 <label class="col-form-label"
@@ -773,7 +791,7 @@
                   <option value="speed">Speed</option>
                   <option value="lowest-price">Lowest price</option>
                 </select>
-                <div class="invalid-feedback">
+                <div class="invalid-feedback" id="priorityErrorContactUs">
                   Please select what matters most to you.
                 </div>
               </div>
@@ -784,7 +802,9 @@
                   id="message"
                   placeholder="Your Message *"
                 ></textarea>
-                <div class="invalid-feedback">A message is required.</div>
+                <div class="invalid-feedback" id="messageErrorContactUs">
+                  A message is required.
+                </div>
               </div>
             </div>
           </div>
