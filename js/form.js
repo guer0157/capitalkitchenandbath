@@ -51,9 +51,7 @@ const setUpContactUsForm = () => {
   const messageErrorContactUs = document.getElementById(
     "messageErrorContactUs",
   );
-  const submitErrorMessageContactUs = document.getElementById(
-    "submitErrorMessageContactUs",
-  );
+  const submitErrorMessage = document.getElementById("submitErrorMessage");
   const submitSuccessMessageContactUs = document.getElementById(
     "submitSuccessMessageContactUs",
   );
@@ -152,13 +150,13 @@ const setUpContactUsForm = () => {
       messageErrorContactUs.classList.remove("d-block");
     }
     if (hasErrors) {
-      submitErrorMessageContactUs.classList.add("d-none");
-      submitErrorMessageContactUs.classList.add("d-block");
+      submitErrorMessage.classList.add("d-none");
+      submitErrorMessage.classList.add("d-block");
       submitSuccessMessageContactUs.classList.remove("d-block");
       submitButtonContactUs.classList.remove("disabled");
       return;
     } else {
-      submitErrorMessageContactUs.classList.remove("d-block");
+      submitErrorMessage.classList.remove("d-block");
       submitSuccessMessageContactUs.classList.remove("d-none");
       submitSuccessMessageContactUs.classList.add("d-block");
       await fetch(
