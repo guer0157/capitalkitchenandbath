@@ -1,12 +1,18 @@
-// ---------- Utilities ----------
+// --------------------
+// Helpers
+// --------------------
 function $(id) {
   return document.getElementById(id);
 }
 
-function showAlert(type, message) {
+function normalizeBaseUrl(url) {
+  return (url || "").replace(/\/+$/, "");
+}
+
+function showAlert(type, msg) {
   const box = $("alertBox");
   box.className = `alert alert-${type}`;
-  box.textContent = message;
+  box.textContent = msg;
   box.classList.remove("d-none");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -17,264 +23,331 @@ function clearAlert() {
   box.textContent = "";
 }
 
-function setPreview(el, obj) {
-  el.textContent = JSON.stringify(obj, null, 2);
-}
-
-function normalizeBaseUrl(url) {
-  return (url || "").replace(/\/+$/, "");
-}
-
-// ---------- State ----------
-let blockCounter = 0;
-
-// ---------- Block UI ----------
-function createBlockCard({ type }) {
-  const id = `block_${++blockCounter}`;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "block-card bg-white p-3";
-  wrapper.dataset.blockId = id;
-
-  wrapper.innerHTML = `
-          <div class="d-flex align-items-center justify-content-between">
-            <div class="d-flex align-items-center gap-2">
-              <span class="badge text-bg-${type === "note" ? "warning" : "info"}">${type}</span>
-              <span class="muted small">Block #${blockCounter}</span>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove-block">Remove</button>
-          </div>
-
-          <div class="row g-3 mt-1">
-            <div class="col-md-4">
-              <label class="form-label">Type</label>
-              <select class="form-select" data-field="type">
-                <option value="paragraph" ${type === "paragraph" ? "selected" : ""}>paragraph</option>
-                <option value="note" ${type === "note" ? "selected" : ""}>note</option>
-              </select>
-            </div>
-
-            <div class="col-md-8">
-              <label class="form-label">Text (optional)</label>
-              <textarea class="form-control" rows="2" data-field="content" placeholder="Write something..."></textarea>
-            </div>
-
-            <div class="col-12">
-              <div class="d-flex align-items-center justify-content-between">
-                <label class="form-label mb-0">Images (optional URLs)</label>
-                <button type="button" class="btn btn-sm btn-outline-secondary" data-action="add-image">+ Add image URL</button>
-              </div>
-              <div class="mt-2 d-grid gap-2" data-field="images"></div>
-              <div class="form-text">Example: https://cdn.example.com/photo.jpg</div>
-            </div>
-          </div>
-        `;
-
-  // Add one empty image row? (No, keep it clean)
-  wrapper.addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-
-    const action = btn.getAttribute("data-action");
-    if (action === "remove-block") {
-      wrapper.remove();
-      return;
-    }
-    if (action === "add-image") {
-      const imagesWrap = wrapper.querySelector('[data-field="images"]');
-      imagesWrap.appendChild(createImageRow());
-      return;
-    }
-  });
-
-  return wrapper;
-}
-
-function createImageRow(value = "") {
-  const row = document.createElement("div");
-  row.className = "input-group img-url-row";
-  row.innerHTML = `
-          <input type="url" class="form-control" placeholder="https://..." value="${value.replace(/"/g, "&quot;")}" />
-          <button type="button" class="btn btn-outline-danger">Remove</button>
-        `;
-  row.querySelector("button").addEventListener("click", () => row.remove());
-  return row;
-}
-
-function readBlocks() {
-  const blocks = [];
-  const blockEls = Array.from($("blocksContainer").children);
-
-  blockEls.forEach((el, idx) => {
-    const type = el.querySelector('[data-field="type"]').value;
-    const content = el.querySelector('[data-field="content"]').value.trim();
-
-    const imgWrap = el.querySelector('[data-field="images"]');
-    const urls = Array.from(imgWrap.querySelectorAll("input"))
-      .map((i) => i.value.trim())
-      .filter(Boolean);
-
-    const block = { type };
-    if (content) block.content = content;
-    if (urls.length) block.images = urls;
-
-    blocks.push(block);
-  });
-
-  return blocks;
-}
-
-function buildPayload() {
-  const payload = {
-    siteId: $("siteId").value.trim(),
-    reportDate: $("reportDate").value,
-    progressPercent: Number($("progressPercent").value),
-    blocks: readBlocks(),
-  };
-  return payload;
-}
-
-// ---------- Init ----------
-function init() {
-  // default date today
-  const today = new Date();
-  $("reportDate").value = today.toISOString().slice(0, 10);
-
-  // load jwt from localStorage
-  const savedJwt = localStorage.getItem("jwt");
-  if (savedJwt) $("jwtInput").value = savedJwt;
-
-  // initial block
-  $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
-
-  // progress bar update
-  function updateProgressBar() {
-    const val = Math.max(
-      0,
-      Math.min(100, Number($("progressPercent").value || 0)),
-    );
-    $("progressBar").style.width = val + "%";
-    $("progressBar").textContent = val + "%";
-    $("progressPercent").value = val;
+function setSessionHint(site) {
+  const hint = $("sessionHint");
+  if (!site) {
+    hint.textContent = "";
+    return;
   }
-  $("progressPercent").addEventListener("input", updateProgressBar);
-  updateProgressBar();
+  hint.textContent = `Unlocked: ${site.name || "Site"} (${site.id})`;
+}
 
-  // add block buttons
-  $("addParagraphBtn").addEventListener("click", () => {
-    $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
-  });
-  $("addNoteBtn").addEventListener("click", () => {
-    $("blocksContainer").appendChild(createBlockCard({ type: "note" }));
-  });
+function setProgress(pct) {
+  const v = Math.max(0, Math.min(100, Number(pct || 0)));
+  $("progressValue").textContent = v;
+  $("progressBar").style.width = v + "%";
+  $("progressBar").textContent = v + "%";
+}
 
-  // save jwt
-  $("saveJwtBtn").addEventListener("click", () => {
-    const t = $("jwtInput").value.trim();
-    if (!t) {
-      localStorage.removeItem("jwt");
-      showAlert("secondary", "JWT removed from localStorage.");
-      return;
-    }
-    localStorage.setItem("jwt", t);
-    showAlert("success", "JWT saved to localStorage.jwt");
-  });
+// --------------------
+// Storage keys
+// --------------------
+const LS_TOKEN = "clientToken";
+const LS_SITE = "clientSite"; // store site info JSON
+const LS_API = "clientApiBase";
+const SITE_ID = "siteId"; // optional: if you want to store site ID separately
 
-  // preview payload
-  $("previewPayloadBtn").addEventListener("click", () => {
-    clearAlert();
-    const payload = buildPayload();
-    setPreview($("payloadPreview"), payload);
+// --------------------
+// API calls
+// --------------------
+async function clientAuth({ apiBase, code }) {
+  const res = await fetch(`${apiBase}/client/auth`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code }),
   });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data?.error || data?.message || "Invalid code");
+  return data; // { token, site, expiresInHours }
+}
 
-  // reset
-  $("resetBtn").addEventListener("click", () => {
-    clearAlert();
-    $("siteId").value = "";
-    $("progressPercent").value = 0;
-    $("blocksContainer").innerHTML = "";
-    $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
-    $("responsePreview").textContent = "";
-    setPreview($("payloadPreview"), buildPayload());
-    $("progressBar").style.width = "0%";
-    $("progressBar").textContent = "0%";
+async function fetchClientReports({ apiBase, token }) {
+  const siteId = localStorage.getItem(SITE_ID);
+  const res = await fetch(`${apiBase}/client/reports/site/${siteId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
   });
 
-  // form submit
-  $("reportForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    clearAlert();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data?.error || data?.message || "Failed to fetch reports");
+  return data; // could be array or {reports:[]}, we handle both
+}
 
-    const form = e.target;
-    if (!form.checkValidity()) {
-      form.classList.add("was-validated");
-      showAlert("danger", "Please fix validation errors.");
-      return;
-    }
+// OPTIONAL (recommended): fetch one report detail
+async function fetchClientReportDetail({ apiBase, token, reportId }) {
+  const res = await fetch(`${apiBase}/client/site/reports/${reportId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
 
-    const apiBase = normalizeBaseUrl($("apiBase").value);
-    const jwt = (
-      $("jwtInput").value.trim() ||
-      localStorage.getItem("jwt") ||
-      ""
-    ).trim();
-    if (!jwt) {
-      showAlert(
-        "warning",
-        "Missing JWT. Paste it above or save it to localStorage.jwt.",
-      );
-      return;
-    }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data?.error || data?.message || "Failed to fetch report");
+  return data; // expected: full report + blocks
+}
 
-    const payload = buildPayload();
-    setPreview($("payloadPreview"), payload);
+// --------------------
+// Rendering
+// --------------------
+function renderReportsList(reports) {
+  const list = $("reportsList");
+  list.innerHTML = "";
 
-    try {
-      const res = await fetch(`${apiBase}/reports`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${jwt}`,
-        },
-        body: JSON.stringify(payload),
+  if (!reports || reports.length === 0) {
+    $("reportsEmpty").classList.remove("d-none");
+    return;
+  }
+  $("reportsEmpty").classList.add("d-none");
+
+  reports.forEach((r) => {
+    const a = document.createElement("a");
+    a.className = "list-group-item list-group-item-action clickable";
+    a.dataset.reportId = r.id;
+
+    const date = r.report_date || r.reportDate || "";
+    const progress = r.progress_percent ?? r.progressPercent ?? 0;
+
+    a.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+              <div class="fw-semibold">Report</div>
+              <small class="muted">${date}</small>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <small class="muted mono">${r.id}</small>
+              <span class="badge text-bg-primary">${progress}%</span>
+            </div>
+          `;
+
+    a.addEventListener("click", async () => {
+      const apiBase = normalizeBaseUrl($("apiBase").value);
+      const token = localStorage.getItem(LS_TOKEN);
+      if (!token)
+        return showAlert("warning", "Session expired. Enter code again.");
+
+      try {
+        clearAlert();
+        // If you don't have the detail route yet, we fall back to showing minimal info
+        const detail = await fetchClientReportDetail({
+          apiBase,
+          token,
+          reportId: r.id,
+        });
+        renderReportDetail(detail);
+      } catch (e) {
+        // fallback: show minimal report info
+        showAlert(
+          "info",
+          "Report detail route not available. Showing summary only.",
+        );
+        renderReportDetail({
+          report: {
+            id: r.id,
+            reportDate: date,
+            progressPercent: progress,
+          },
+          blocks: [],
+        });
+      }
+    });
+
+    list.appendChild(a);
+  });
+}
+
+function renderReportDetail(data) {
+  $("reportDetailEmpty").classList.add("d-none");
+  $("reportDetail").classList.remove("d-none");
+
+  // support either {report, blocks} or a flat object
+  const report = data.report || data;
+  const blocks = data.blocks || report.blocks || [];
+
+  const reportDate = report.report_date || report.reportDate || "";
+  const progress = report.progress_percent ?? report.progressPercent ?? 0;
+
+  $("reportTitle").textContent = `Report`;
+  $("reportMeta").textContent = `Date: ${reportDate} • ID: ${report.id || ""}`;
+  setProgress(progress);
+
+  const blocksContainer = $("blocksContainer");
+  blocksContainer.innerHTML = "";
+
+  if (!blocks.length) {
+    const empty = document.createElement("div");
+    empty.className = "muted";
+    empty.textContent = "No blocks in this report.";
+    blocksContainer.appendChild(empty);
+    return;
+  }
+
+  blocks.forEach((b) => {
+    const type = b.block_type || b.type || "paragraph";
+    const content = (b.content || "").trim();
+
+    const images =
+      b.images ||
+      b.image_urls ||
+      b.imageUrls ||
+      (b.imageRows ? b.imageRows.map((x) => x.image_url) : []);
+
+    const card = document.createElement("div");
+    card.className = `report-card bg-white p-3`;
+
+    const header = document.createElement("div");
+    header.className = "d-flex justify-content-between align-items-center mb-2";
+    header.innerHTML = `
+            <span class="badge text-bg-${type === "note" ? "warning" : "info"}">${type}</span>
+          `;
+
+    const body = document.createElement("div");
+    body.className = `block ${type === "note" ? "note" : ""}`;
+
+    body.innerHTML = content
+      ? `<div>${escapeHtml(content).replace(/\n/g, "<br/>")}</div>`
+      : `<div class="muted">No text.</div>`;
+
+    card.appendChild(header);
+    card.appendChild(body);
+
+    if (images && images.length) {
+      const grid = document.createElement("div");
+      grid.className = "img-grid mt-3";
+
+      images.forEach((url) => {
+        const img = document.createElement("img");
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.src = url;
+        img.alt = "Report image";
+        grid.appendChild(img);
       });
 
-      const text = await res.text();
-      let json;
-      try {
-        json = JSON.parse(text);
-      } catch {
-        json = { raw: text };
-      }
-
-      setPreview($("responsePreview"), json);
-
-      if (!res.ok) {
-        showAlert(
-          "danger",
-          `Failed to create report (${res.status}). See response below.`,
-        );
-        return;
-      }
-
-      // Your backend may return client access code when created:
-      // { reportId, clientAccess: { code, existed } }
-      if (json?.clientAccess?.code) {
-        showAlert(
-          "success",
-          `Report created. Client code: ${json.clientAccess.code}`,
-        );
-      } else {
-        showAlert("success", "Report created successfully.");
-      }
-    } catch (err) {
-      showAlert("danger", "Network error creating report.");
-      $("responsePreview").textContent = String(err);
+      card.appendChild(grid);
     }
+
+    blocksContainer.appendChild(card);
   });
 
-  // initial preview
-  setPreview($("payloadPreview"), buildPayload());
+  // Debug (optional)
+  // $("rawDebug").classList.remove("d-none");
+  // $("rawDebug").textContent = JSON.stringify(data, null, 2);
 }
 
-init();
+function escapeHtml(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// --------------------
+// Init + actions
+// --------------------
+async function unlockWithCode() {
+  clearAlert();
+
+  const apiBase = normalizeBaseUrl($("apiBase").value);
+  const code = $("codeInput").value.trim();
+
+  if (!code) {
+    showAlert("warning", "Please enter your access code.");
+    return;
+  }
+
+  try {
+    const data = await clientAuth({ apiBase, code });
+    console.log("Auth success:", data);
+    localStorage.setItem(LS_TOKEN, data.token);
+    localStorage.setItem(LS_SITE, JSON.stringify(data.site || null));
+    localStorage.setItem(LS_API, apiBase);
+    localStorage.setItem(SITE_ID, data.site?.id || "");
+
+    setSessionHint(data.site);
+    showAlert("success", "Access granted. Loading reports...");
+
+    await loadReports();
+  } catch (e) {
+    showAlert("danger", e?.message || "Invalid code.");
+  }
+}
+
+async function loadReports() {
+  clearAlert();
+  const apiBase = normalizeBaseUrl($("apiBase").value);
+  const token = localStorage.getItem(LS_TOKEN);
+
+  if (!token) {
+    showAlert("warning", "No client session. Enter your access code.");
+    return;
+  }
+
+  try {
+    const raw = await fetchClientReports({ apiBase, token });
+
+    // support both: array OR {reports:[...]}
+    const reports = Array.isArray(raw) ? raw : raw.reports || raw.items || [];
+    renderReportsList(reports);
+
+    const site = JSON.parse(localStorage.getItem(LS_SITE) || "null");
+    setSessionHint(site);
+    $("siteInfo").textContent = site
+      ? `Site: ${site.name || ""} • ${site.address || ""}`
+      : "";
+
+    if (reports.length === 0) {
+      $("reportDetailEmpty").classList.remove("d-none");
+      $("reportDetail").classList.add("d-none");
+    }
+  } catch (e) {
+    showAlert("danger", e?.message || "Failed to fetch reports.");
+  }
+}
+
+function useSavedSession() {
+  clearAlert();
+  const savedApi = localStorage.getItem(LS_API);
+  if (savedApi) $("apiBase").value = savedApi;
+
+  const site = JSON.parse(localStorage.getItem(LS_SITE) || "null");
+  setSessionHint(site);
+
+  loadReports();
+}
+
+function logout() {
+  localStorage.removeItem(LS_TOKEN);
+  localStorage.removeItem(LS_SITE);
+  localStorage.removeItem(LS_API);
+
+  $("reportsList").innerHTML = "";
+  $("reportsEmpty").classList.add("d-none");
+  $("siteInfo").textContent = "";
+  $("reportDetail").classList.add("d-none");
+  $("reportDetailEmpty").classList.remove("d-none");
+  $("codeInput").value = "";
+  setSessionHint(null);
+
+  showAlert("secondary", "Logged out.");
+}
+
+// wire buttons
+$("authBtn").addEventListener("click", unlockWithCode);
+$("loadSavedBtn").addEventListener("click", useSavedSession);
+$("logoutBtn").addEventListener("click", logout);
+$("refreshReportsBtn").addEventListener("click", loadReports);
+
+// auto-load saved session on open
+(function boot() {
+  const savedApi = localStorage.getItem(LS_API);
+  if (savedApi) $("apiBase").value = savedApi;
+
+  const site = JSON.parse(localStorage.getItem(LS_SITE) || "null");
+  if (site) setSessionHint(site);
+
+  if (localStorage.getItem(LS_TOKEN)) {
+    useSavedSession();
+  }
+})();

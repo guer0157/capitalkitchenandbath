@@ -1,0 +1,28 @@
+.block-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+}
+.muted {
+  color: #6c757d;
+}
+.mono {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+}
+.img-url-row .form-control {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.img-url-row .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.log-in-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.log-in-logo > img {
+  width: 80%;
+}

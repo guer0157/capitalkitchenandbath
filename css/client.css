@@ -1,20 +1,43 @@
-.block-card {
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-}
-.muted {
-  color: #6c757d;
-}
 .mono {
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
 }
-.img-url-row .form-control {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+.muted {
+  color: #6c757d;
 }
-.img-url-row .btn {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
+.report-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+}
+.block {
+  border-left: 4px solid #e9ecef;
+  padding-left: 12px;
+}
+.block.note {
+  border-left-color: #ffc107;
+  background: #fff8e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.img-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.img-grid img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+.clickable {
+  cursor: pointer;
+}
+.sticky-top-lite {
+  position: sticky;
+  top: 10px;
+  z-index: 10;
 }
