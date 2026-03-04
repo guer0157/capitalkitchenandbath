@@ -29,7 +29,7 @@ function setSessionHint(site) {
     hint.textContent = "";
     return;
   }
-  hint.textContent = `Unlocked: ${site.name || "Site"} (${site.id})`;
+  hint.textContent = `Unlocked: ${site.name || "Site"}`;
 }
 
 function setProgress(pct) {
@@ -63,10 +63,13 @@ async function clientAuth({ apiBase, code }) {
 
 async function fetchClientReports({ apiBase, token }) {
   const siteId = localStorage.getItem(SITE_ID);
-  const res = await fetch(`${apiBase}/client/reports/site/${siteId}`, {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await fetch(
+    `${apiBase}/client/reports/site/${siteId}?expand=true`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok)
@@ -87,6 +90,83 @@ async function fetchClientReportDetail({ apiBase, token, reportId }) {
   return data; // expected: full report + blocks
 }
 
+const formatDate = (dateStr) => {
+  const date = new Date(dateStr);
+  const formatted = new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+  return formatted;
+};
+function escapeHtml(s) {
+  return String(s ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+const getReportBlocksHtml = (report) => {
+  if (!report?.blocks?.length) return "";
+
+  return report.blocks
+    .slice()
+    .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+    .map((block) => {
+      const isNote = block.block_type === "note";
+
+      const imagesHtml = (block.images || [])
+        .slice()
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+        .map(
+          (img) => `
+            <a href="${img.image_url}" target="_blank" rel="noopener">
+              <img
+                src="${img.image_url}"
+                class="img-thumbnail me-2 mb-2"
+                style="width:110px;height:110px;object-fit:cover;"
+                alt="Report image"
+                loading="lazy"
+              />
+            </a>
+          `,
+        )
+        .join("");
+
+      return `
+        <div class="mt-3 p-3 rounded border ${
+          isNote ? "border-warning-subtle bg-warning-subtle" : "border-light"
+        }">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="badge ${isNote ? "text-bg-warning" : "text-bg-info"}">
+              ${isNote ? "note" : "block"}
+            </span>
+            <small class="text-muted mono">#${(block.sort_order ?? 0) + 1}</small>
+          </div>
+
+          ${
+            block.content
+              ? `<div class="mb-2">${escapeHtml(block.content)}</div>`
+              : ""
+          }
+
+          ${
+            imagesHtml
+              ? `
+                <div class="mt-2">
+                  <div class="small text-muted mb-1">Images</div>
+                  <div class="d-flex flex-wrap">${imagesHtml}</div>
+                </div>
+              `
+              : ""
+          }
+        </div>
+      `;
+    })
+    .join("");
+};
 // --------------------
 // Rendering
 // --------------------
@@ -101,57 +181,26 @@ function renderReportsList(reports) {
   $("reportsEmpty").classList.add("d-none");
 
   reports.forEach((r) => {
-    const a = document.createElement("a");
-    a.className = "list-group-item list-group-item-action clickable";
-    a.dataset.reportId = r.id;
+    const div = document.createElement("div");
+    div.className = "list-group-item ";
+    div.dataset.reportId = r.id;
 
     const date = r.report_date || r.reportDate || "";
     const progress = r.progress_percent ?? r.progressPercent ?? 0;
 
-    a.innerHTML = `
+    div.innerHTML = `
             <div class="d-flex w-100 justify-content-between">
-              <div class="fw-semibold">Report</div>
-              <small class="muted">${date}</small>
+              <div class="fw-semibold">Date</div>
+              <small class="muted">${formatDate(date)}</small>
             </div>
             <div class="d-flex justify-content-between align-items-center mt-1">
-              <small class="muted mono">${r.id}</small>
+               <small class="muted mono">Progress:</small>
               <span class="badge text-bg-primary">${progress}%</span>
             </div>
+            ${getReportBlocksHtml(r)}
           `;
 
-    a.addEventListener("click", async () => {
-      const apiBase = normalizeBaseUrl($("apiBase").value);
-      const token = localStorage.getItem(LS_TOKEN);
-      if (!token)
-        return showAlert("warning", "Session expired. Enter code again.");
-
-      try {
-        clearAlert();
-        // If you don't have the detail route yet, we fall back to showing minimal info
-        const detail = await fetchClientReportDetail({
-          apiBase,
-          token,
-          reportId: r.id,
-        });
-        renderReportDetail(detail);
-      } catch (e) {
-        // fallback: show minimal report info
-        showAlert(
-          "info",
-          "Report detail route not available. Showing summary only.",
-        );
-        renderReportDetail({
-          report: {
-            id: r.id,
-            reportDate: date,
-            progressPercent: progress,
-          },
-          blocks: [],
-        });
-      }
-    });
-
-    list.appendChild(a);
+    list.appendChild(div);
   });
 }
 
@@ -286,7 +335,7 @@ async function loadReports() {
 
   try {
     const raw = await fetchClientReports({ apiBase, token });
-
+    console.log("Fetched reports:", raw);
     // support both: array OR {reports:[...]}
     const reports = Array.isArray(raw) ? raw : raw.reports || raw.items || [];
     renderReportsList(reports);
@@ -294,7 +343,7 @@ async function loadReports() {
     const site = JSON.parse(localStorage.getItem(LS_SITE) || "null");
     setSessionHint(site);
     $("siteInfo").textContent = site
-      ? `Site: ${site.name || ""} • ${site.address || ""}`
+      ? `Site Name: ${site.name || ""} • Address: ${site.address || ""}`
       : "";
 
     if (reports.length === 0) {
