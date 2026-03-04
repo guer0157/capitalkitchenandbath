@@ -20,9 +20,9 @@ function clearAlert() {
   box.textContent = "";
 }
 
-function setPreview(el, obj) {
-  el.textContent = JSON.stringify(obj, null, 2);
-}
+// function setPreview(el, obj) {
+//   el.textContent = JSON.stringify(obj, null, 2);
+// }
 
 function normalizeBaseUrl(url) {
   return (url || "").replace(/\/+$/, "");
@@ -430,7 +430,7 @@ function init() {
   // preview payload
   $("previewPayloadBtn").addEventListener("click", () => {
     clearAlert();
-    setPreview($("payloadPreview"), buildPayload());
+    // setPreview($("payloadPreview"), buildPayload());
   });
 
   // reset
@@ -441,7 +441,7 @@ function init() {
     $("blocksContainer").innerHTML = "";
     $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
     $("responsePreview").textContent = "";
-    setPreview($("payloadPreview"), buildPayload());
+    // setPreview($("payloadPreview"), buildPayload());
     $("progressBar").style.width = "0%";
     $("progressBar").textContent = "0%";
   });
@@ -466,7 +466,7 @@ function init() {
     }
 
     const payload = buildPayload();
-    setPreview($("payloadPreview"), payload);
+    // setPreview($("payloadPreview"), payload);
     if (!$("siteId").value.trim()) {
       $("siteInvalid").style.display = "block";
       showAlert("danger", "Please select a site.");
@@ -493,7 +493,7 @@ function init() {
         json = { raw: text };
       }
 
-      setPreview($("responsePreview"), json);
+      // setPreview($("responsePreview"), json);
 
       // If token expired/invalid, kick back to login
       if (res.status === 401 || res.status === 403) {
@@ -526,7 +526,7 @@ function init() {
   });
 
   // initial preview
-  setPreview($("payloadPreview"), buildPayload());
+  // setPreview($("payloadPreview"), buildPayload());
 
   // initial UI state
   const hasToken = !!localStorage.getItem("jwt");
