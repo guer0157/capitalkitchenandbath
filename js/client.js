@@ -335,9 +335,10 @@ async function loadReports() {
 
   try {
     const raw = await fetchClientReports({ apiBase, token });
-    console.log("Fetched reports:", raw);
     // support both: array OR {reports:[...]}
     const reports = Array.isArray(raw) ? raw : raw.reports || raw.items || [];
+    console.log("Fetched reports:", reports);
+    setProgress(reports.at(-1).progress_percent || 0);
     renderReportsList(reports);
 
     const site = JSON.parse(localStorage.getItem(LS_SITE) || "null");

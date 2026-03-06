@@ -1,7 +1,7 @@
 // ---------- Utilities ----------
 // const API_BASE_DEFAULT = "http://127.0.0.1:3330";
+let minProgressPercentage = 0;
 const API_BASE_DEFAULT = "https://api.siteman.cessar.tech";
-
 function $(id) {
   return document.getElementById(id);
 }
@@ -10,6 +10,36 @@ function showAlert(type, message) {
   const box = $("alertBox");
   box.className = `alert alert-${type}`;
   box.textContent = message;
+  box.classList.remove("d-none");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+async function showCodeBox(site, type, message) {
+  const [codeResp, reportResp] = await Promise.all([
+    fetch(`${API_BASE_DEFAULT}/sites/${site}/client-code`, {
+      headers: {
+        Authorization: `Bearer ${getJwt()}`,
+      },
+    }),
+    fetch(`${API_BASE_DEFAULT}/reports/site/${site}`, {
+      headers: {
+        Authorization: `Bearer ${getJwt()}`,
+      },
+    }),
+  ]);
+
+  const [codeData, reportData] = await Promise.all([
+    codeResp.json(),
+    reportResp.json(),
+  ]);
+  minProgressPercentage = reportData[0].progress_percent || 0;
+  updateProgressBar(minProgressPercentage);
+  // enforce minimum progress
+  $("progressPercent").min = minProgressPercentage;
+  const box = $("codeBox");
+  if (codeData.code) {
+    box.textContent = `${message}\n\n${codeData.code}`;
+  }
+  box.className = `alert alert-${type}`;
   box.classList.remove("d-none");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -267,7 +297,7 @@ function getSiteSubtitle(site) {
 function setSelectedSite(site) {
   const siteId = site?.id || site?.siteId || "";
   $("siteId").value = siteId;
-
+  showCodeBox(siteId, "success", "Report code for client:");
   const title = getSiteTitle(site);
   const subtitle = getSiteSubtitle(site);
 
@@ -343,7 +373,32 @@ async function loadSitesIntoUI() {
       menu.innerHTML = `<li class="px-3 py-2 text-danger small">${escapeHtml(err.message || err)}</li>`;
   }
 }
+function updateProgressBar(value) {
+  const warning = $("progressWarning");
 
+  if (typeof value !== "object") {
+    const val = Math.max(0, Math.min(100, Number(value)));
+    if (warning) warning.classList.add("d-none");
+
+    $("progressBar").style.width = val + "%";
+    $("progressBar").textContent = val + "%";
+    $("progressPercent").value = val;
+  } else {
+    let val = Number($("progressPercent").value || minProgressPercentage);
+
+    if (val < minProgressPercentage) {
+      if (warning) warning.classList.remove("d-none");
+    } else {
+      if (warning) warning.classList.add("d-none");
+    }
+
+    val = Math.max(minProgressPercentage, Math.min(100, val));
+
+    $("progressBar").style.width = val + "%";
+    $("progressBar").textContent = val + "%";
+    $("progressPercent").value = val;
+  }
+}
 // ---------- Init ----------
 function init() {
   // default date today
@@ -358,15 +413,7 @@ function init() {
   $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
 
   // progress bar update
-  function updateProgressBar() {
-    const val = Math.max(
-      0,
-      Math.min(100, Number($("progressPercent").value || 0)),
-    );
-    $("progressBar").style.width = val + "%";
-    $("progressBar").textContent = val + "%";
-    $("progressPercent").value = val;
-  }
+
   $("progressPercent").addEventListener("input", updateProgressBar);
   updateProgressBar();
 

@@ -35,6 +35,7 @@
                     class="form-control"
                     value="https://api.siteman.cessar.tech"
                   />
+                  <!-- value="http://127.0.0.1:3330" -->
                 </div>
 
                 <div class="col-md-5">
@@ -88,7 +89,23 @@
                   </button>
                 </div>
                 <div class="card-body">
-                  <div id="siteInfo" class="mb-2 muted small"></div>
+                  <div
+                    id="siteInfo"
+                    class="mb-2 muted medium fw-semibold"
+                  ></div>
+                  <div class="muted fw-semibold">Total Job Progress</div>
+                  <div class="mb-4 progress" style="height: 28px">
+                    <div
+                      id="progressBar"
+                      class="progress-bar"
+                      role="progressbar"
+                      style="width: 0%"
+                    >
+                      0%
+                    </div>
+                  </div>
+                  <div class="mb-2 fw-semibold">Detailed Report</div>
+
                   <div id="reportsList" class="list-group"></div>
                   <div id="reportsEmpty" class="muted small mt-2 d-none">
                     No reports yet.
@@ -98,7 +115,7 @@
             </div>
 
             <!-- RIGHT: REPORT DETAIL -->
-            <div class="col-lg-7">
+            <div class="d-none">
               <div class="card">
                 <div class="card-header">Report Detail</div>
                 <div class="card-body">
@@ -145,10 +162,10 @@
             </div>
           </div>
 
-          <div class="text-center muted small mt-4">
+          <!-- <div class="text-center muted small mt-4">
             This page stores a client token in
             <span class="mono">localStorage.clientToken</span>.
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
