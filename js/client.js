@@ -116,12 +116,13 @@ const getReportBlocksHtml = (report) => {
     .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
     .map((block) => {
       const isNote = block.block_type === "note";
-
+      console.log("Rendering block:", block);
       const imagesHtml = (block.images || [])
         .slice()
         .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
-        .map(
-          (img) => `
+        .map((img) => {
+          console.log("Rendering image:", img);
+          return `
             <a href="${img.image_url}" target="_blank" rel="noopener">
               <img
                 src="${img.image_url}"
@@ -131,8 +132,8 @@ const getReportBlocksHtml = (report) => {
                 loading="lazy"
               />
             </a>
-          `,
-        )
+          `;
+        })
         .join("");
 
       return `

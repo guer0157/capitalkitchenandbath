@@ -1,7 +1,7 @@
-// ---------- Utilities ----------
-// const API_BASE_DEFAULT = "http://127.0.0.1:3330";
 let minProgressPercentage = 0;
-const API_BASE_DEFAULT = "https://api.siteman.cessar.tech";
+// const API_BASE_DEFAULT = "https://api.siteman.cessar.tech";
+const API_BASE_DEFAULT = "http://127.0.0.1:3330";
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -13,6 +13,7 @@ function showAlert(type, message) {
   box.classList.remove("d-none");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
 async function showCodeBox(site, type, message) {
   const [codeResp, reportResp] = await Promise.all([
     fetch(`${API_BASE_DEFAULT}/sites/${site}/client-code`, {
@@ -31,10 +32,11 @@ async function showCodeBox(site, type, message) {
     codeResp.json(),
     reportResp.json(),
   ]);
-  minProgressPercentage = reportData[0].progress_percent || 0;
+
+  minProgressPercentage = reportData?.[0]?.progress_percent || 0;
   updateProgressBar(minProgressPercentage);
-  // enforce minimum progress
   $("progressPercent").min = minProgressPercentage;
+
   const box = $("codeBox");
   if (codeData.code) {
     box.textContent = `${message}\n\n${codeData.code}`;
@@ -50,17 +52,7 @@ function clearAlert() {
   box.textContent = "";
 }
 
-// function setPreview(el, obj) {
-//   el.textContent = JSON.stringify(obj, null, 2);
-// }
-
-function normalizeBaseUrl(url) {
-  return (url || "").replace(/\/+$/, "");
-}
-
-// ---------- Auth helpers ----------
 function getJwt() {
-  // JWT input can override, but localStorage is the main storage
   const fromInput = $("jwtInput")?.value?.trim();
   const fromStorage = localStorage.getItem("jwt") || "";
   return (fromInput || fromStorage).trim();
@@ -94,10 +86,8 @@ function setAuthedUI(isAuthed) {
   }
 }
 
-// ---------- State ----------
 let blockCounter = 0;
 
-// ---------- Block UI ----------
 function createBlockCard({ type }) {
   const id = `block_${++blockCounter}`;
 
@@ -129,12 +119,18 @@ function createBlockCard({ type }) {
       </div>
 
       <div class="col-12">
-        <div class="d-flex align-items-center justify-content-between">
-          <label class="form-label mb-0">Images (optional URLs)</label>
-          <button type="button" class="btn btn-sm btn-outline-secondary" data-action="add-image">+ Add image URL</button>
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <label class="form-label mb-0">Images (optional)</label>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-action="add-camera-image">+ Camera</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-action="add-gallery-image">+ Gallery</button>
+          </div>
         </div>
+
         <div class="mt-2 d-grid gap-2" data-field="images"></div>
-        <div class="form-text">Example: https://cdn.example.com/photo.jpg</div>
+        <div class="form-text">
+          On mobile, Camera opens the device camera directly when supported.
+        </div>
       </div>
     </div>
   `;
@@ -148,9 +144,20 @@ function createBlockCard({ type }) {
       wrapper.remove();
       return;
     }
-    if (action === "add-image") {
-      const imagesWrap = wrapper.querySelector('[data-field="images"]');
-      imagesWrap.appendChild(createImageRow());
+
+    const imagesWrap = wrapper.querySelector('[data-field="images"]');
+
+    if (action === "add-camera-image") {
+      const row = createImageRow({ useCamera: true });
+      imagesWrap.appendChild(row);
+      row.querySelector('input[type="file"]').click();
+      return;
+    }
+
+    if (action === "add-gallery-image") {
+      const row = createImageRow({ useCamera: false });
+      imagesWrap.appendChild(row);
+      row.querySelector('input[type="file"]').click();
       return;
     }
   });
@@ -158,14 +165,65 @@ function createBlockCard({ type }) {
   return wrapper;
 }
 
-function createImageRow(value = "") {
+function createImageRow({ useCamera = false } = {}) {
   const row = document.createElement("div");
-  row.className = "input-group img-url-row";
+  row.className = "border rounded p-2 bg-light";
+
   row.innerHTML = `
-    <input type="url" class="form-control" placeholder="https://..." value="${value.replace(/"/g, "&quot;")}" />
-    <button type="button" class="btn btn-outline-danger">Remove</button>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <input
+        type="file"
+        class="form-control"
+        accept="image/*"
+        ${useCamera ? 'capture="environment"' : ""}
+        style="max-width: 320px;"
+      />
+      <button type="button" class="btn btn-outline-danger btn-sm">Remove</button>
+    </div>
+    <div class="mt-2 d-none" data-role="preview-wrap">
+      <img
+        data-role="preview-img"
+        alt="Preview"
+        class="img-thumbnail"
+        style="max-width: 180px; max-height: 180px; object-fit: cover;"
+      />
+      <div class="small text-muted mt-1" data-role="file-name"></div>
+    </div>
   `;
-  row.querySelector("button").addEventListener("click", () => row.remove());
+
+  const fileInput = row.querySelector('input[type="file"]');
+  const removeBtn = row.querySelector("button");
+  const previewWrap = row.querySelector('[data-role="preview-wrap"]');
+  const previewImg = row.querySelector('[data-role="preview-img"]');
+  const fileName = row.querySelector('[data-role="file-name"]');
+
+  let objectUrl = null;
+
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files?.[0];
+
+    if (!file) {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
+      previewWrap.classList.add("d-none");
+      previewImg.removeAttribute("src");
+      fileName.textContent = "";
+      return;
+    }
+
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = URL.createObjectURL(file);
+
+    previewImg.src = objectUrl;
+    fileName.textContent = file.name;
+    previewWrap.classList.remove("d-none");
+  });
+
+  removeBtn.addEventListener("click", () => {
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    row.remove();
+  });
+
   return row;
 }
 
@@ -177,14 +235,8 @@ function readBlocks() {
     const type = el.querySelector('[data-field="type"]').value;
     const content = el.querySelector('[data-field="content"]').value.trim();
 
-    const imgWrap = el.querySelector('[data-field="images"]');
-    const urls = Array.from(imgWrap.querySelectorAll("input"))
-      .map((i) => i.value.trim())
-      .filter(Boolean);
-
     const block = { type };
     if (content) block.content = content;
-    if (urls.length) block.images = urls;
 
     blocks.push(block);
   });
@@ -192,18 +244,44 @@ function readBlocks() {
   return blocks;
 }
 
-function buildPayload() {
+function getBlockFiles() {
+  const blockEls = Array.from($("blocksContainer").children);
+
+  return blockEls.map((el) => {
+    const imgWrap = el.querySelector('[data-field="images"]');
+    const fileInputs = Array.from(
+      imgWrap.querySelectorAll('input[type="file"]'),
+    );
+
+    return fileInputs.map((input) => input.files?.[0] || null).filter(Boolean);
+  });
+}
+
+function buildReportPayload() {
   return {
-    siteId: $("siteId").value.trim(),
     reportDate: $("reportDate").value,
     progressPercent: Number($("progressPercent").value),
     blocks: readBlocks(),
   };
 }
 
-// ---------- Auth API ----------
+function buildReportFormData() {
+  const formData = new FormData();
+  const reportPayload = buildReportPayload();
+  const blockFiles = getBlockFiles();
+
+  formData.append("report", JSON.stringify(reportPayload));
+
+  blockFiles.forEach((files, blockIndex) => {
+    files.forEach((file) => {
+      formData.append(`blockImages[${blockIndex}]`, file);
+    });
+  });
+
+  return formData;
+}
+
 async function login(apiBase, email, password) {
-  // ✅ Adjust this endpoint to match your backend
   const url = `${API_BASE_DEFAULT}/auth/email/signin`;
 
   const res = await fetch(url, {
@@ -225,7 +303,6 @@ async function login(apiBase, email, password) {
     throw new Error(msg);
   }
 
-  // Common patterns: { token }, { jwt }, { accessToken }, { data: { token } }
   const token =
     json?.token ||
     json?.jwt ||
@@ -264,7 +341,6 @@ async function fetchSites(apiBase, jwt) {
     throw new Error(msg);
   }
 
-  // Accept either { items: [...] } or [...] etc.
   const items = Array.isArray(json) ? json : json?.sites || json?.data || [];
   if (!Array.isArray(items)) return [];
 
@@ -272,7 +348,6 @@ async function fetchSites(apiBase, jwt) {
 }
 
 function getSiteTitle(site) {
-  // Adjust based on your API shape
   return (
     site?.name ||
     site?.title ||
@@ -284,12 +359,10 @@ function getSiteTitle(site) {
 }
 
 function getSiteSubtitle(site) {
-  // Adjust based on your API shape
   const parts = [];
   if (site?.address) parts.push(site.address);
   if (site?.city) parts.push(site.city);
   if (site?.clientName) parts.push(site.clientName);
-  // fallback: show id if nothing else
   if (!parts.length && site?.id) parts.push(site.id);
   return parts.join(" • ");
 }
@@ -298,6 +371,7 @@ function setSelectedSite(site) {
   const siteId = site?.id || site?.siteId || "";
   $("siteId").value = siteId;
   showCodeBox(siteId, "success", "Report code for client:");
+
   const title = getSiteTitle(site);
   const subtitle = getSiteSubtitle(site);
 
@@ -305,7 +379,6 @@ function setSelectedSite(site) {
     ? `${escapeHtml(title)} <div class="small text-muted">${escapeHtml(subtitle)}</div>`
     : escapeHtml(title);
 
-  // Hide invalid message if selected
   $("siteInvalid").style.display = siteId ? "none" : "block";
 }
 
@@ -351,28 +424,32 @@ async function loadSitesIntoUI() {
   const jwt = getJwt();
 
   if (!jwt) {
-    // Not logged in yet
     const menu = $("siteDropdownMenu");
-    if (menu)
+    if (menu) {
       menu.innerHTML = `<li class="px-3 py-2 text-muted small">Log in to load sites.</li>`;
+    }
     return;
   }
 
   const menu = $("siteDropdownMenu");
-  if (menu)
+  if (menu) {
     menu.innerHTML = `<li class="px-3 py-2 text-muted small">Loading…</li>`;
+  }
 
   try {
     const sites = await fetchSites(API_BASE_DEFAULT, jwt);
     renderSitesDropdown(sites);
 
-    // Optional: auto-select first site if nothing selected yet
-    if (!$("siteId").value && sites[0]) setSelectedSite(sites[0]);
+    if (!$("siteId").value && sites[0]) {
+      setSelectedSite(sites[0]);
+    }
   } catch (err) {
-    if (menu)
+    if (menu) {
       menu.innerHTML = `<li class="px-3 py-2 text-danger small">${escapeHtml(err.message || err)}</li>`;
+    }
   }
 }
+
 function updateProgressBar(value) {
   const warning = $("progressWarning");
 
@@ -399,33 +476,43 @@ function updateProgressBar(value) {
     $("progressPercent").value = val;
   }
 }
-// ---------- Init ----------
+
+function resetFormUI() {
+  clearAlert();
+  $("siteId").value = "";
+  $("progressPercent").value = 0;
+  $("blocksContainer").innerHTML = "";
+  $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
+  $("progressBar").style.width = "0%";
+  $("progressBar").textContent = "0%";
+  $("siteDropdownBtn").innerHTML = "Select a site...";
+  const codeBox = $("codeBox");
+  if (codeBox) {
+    codeBox.classList.add("d-none");
+    codeBox.textContent = "";
+  }
+}
+
 function init() {
-  // default date today
   const today = new Date();
   $("reportDate").value = today.toISOString().slice(0, 10);
 
-  // load jwt from localStorage
   const savedJwt = localStorage.getItem("jwt");
   if (savedJwt) $("jwtInput").value = savedJwt;
 
-  // initial block
   $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
-
-  // progress bar update
 
   $("progressPercent").addEventListener("input", updateProgressBar);
   updateProgressBar();
 
-  // add block buttons
   $("addParagraphBtn").addEventListener("click", () => {
     $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
   });
+
   $("addNoteBtn").addEventListener("click", () => {
     $("blocksContainer").appendChild(createBlockCard({ type: "note" }));
   });
 
-  // manual save jwt (still useful for debugging)
   $("saveJwtBtn").addEventListener("click", () => {
     const t = $("jwtInput").value.trim();
     if (!t) {
@@ -439,7 +526,6 @@ function init() {
     setAuthedUI(true);
   });
 
-  // logout
   $("logoutBtn")?.addEventListener("click", () => {
     clearAlert();
     clearJwt();
@@ -447,7 +533,6 @@ function init() {
     setAuthedUI(false);
   });
 
-  // login form submit
   $("loginForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearAlert();
@@ -474,26 +559,10 @@ function init() {
     }
   });
 
-  // preview payload
-  $("previewPayloadBtn").addEventListener("click", () => {
-    clearAlert();
-    // setPreview($("payloadPreview"), buildPayload());
-  });
-
-  // reset
   $("resetBtn").addEventListener("click", () => {
-    clearAlert();
-    $("siteId").value = "";
-    $("progressPercent").value = 0;
-    $("blocksContainer").innerHTML = "";
-    $("blocksContainer").appendChild(createBlockCard({ type: "paragraph" }));
-    $("responsePreview").textContent = "";
-    // setPreview($("payloadPreview"), buildPayload());
-    $("progressBar").style.width = "0%";
-    $("progressBar").textContent = "0%";
+    resetFormUI();
   });
 
-  // form submit (create report)
   $("reportForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     clearAlert();
@@ -512,25 +581,32 @@ function init() {
       return;
     }
 
-    const payload = buildPayload();
-    // setPreview($("payloadPreview"), payload);
-    if (!$("siteId").value.trim()) {
+    const siteId = $("siteId").value.trim();
+    if (!siteId) {
       $("siteInvalid").style.display = "block";
       showAlert("danger", "Please select a site.");
       return;
     }
-    try {
-      const res = await fetch(
-        `${API_BASE_DEFAULT}/reports${payload.siteId ? `/${payload.siteId}` : ""}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${jwt}`,
-          },
-          body: JSON.stringify(payload),
-        },
+
+    const progress = Number($("progressPercent").value || 0);
+    if (progress < minProgressPercentage) {
+      showAlert(
+        "danger",
+        `Progress cannot be lower than ${minProgressPercentage}%.`,
       );
+      return;
+    }
+
+    const formData = buildReportFormData();
+
+    try {
+      const res = await fetch(`${API_BASE_DEFAULT}/reports/${siteId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+        body: formData,
+      });
 
       const text = await res.text();
       let json;
@@ -540,9 +616,6 @@ function init() {
         json = { raw: text };
       }
 
-      // setPreview($("responsePreview"), json);
-
-      // If token expired/invalid, kick back to login
       if (res.status === 401 || res.status === 403) {
         clearJwt();
         setAuthedUI(false);
@@ -553,7 +626,7 @@ function init() {
       if (!res.ok) {
         showAlert(
           "danger",
-          `Failed to create report (${res.status}). See response below.`,
+          json?.message || `Failed to create report (${res.status}).`,
         );
         return;
       }
@@ -566,16 +639,18 @@ function init() {
       } else {
         showAlert("success", "Report created successfully.");
       }
+
+      const selectedSiteId = $("siteId").value.trim();
+      resetFormUI();
+      if (selectedSiteId) {
+        $("siteId").value = selectedSiteId;
+        await loadSitesIntoUI();
+      }
     } catch (err) {
       showAlert("danger", "Network error creating report.");
-      $("responsePreview").textContent = String(err);
     }
   });
 
-  // initial preview
-  // setPreview($("payloadPreview"), buildPayload());
-
-  // initial UI state
   const hasToken = !!localStorage.getItem("jwt");
   setAuthedUI(hasToken);
   if (hasToken) loadSitesIntoUI();
