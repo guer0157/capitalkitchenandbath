@@ -1,6 +1,6 @@
 let minProgressPercentage = 0;
-// const API_BASE_DEFAULT = "https://api.siteman.cessar.tech";
-const API_BASE_DEFAULT = "http://127.0.0.1:3330";
+const API_BASE_DEFAULT = "https://api.siteman.cessar.tech";
+// const API_BASE_DEFAULT = "http://127.0.0.1:3330";
 
 function $(id) {
   return document.getElementById(id);
